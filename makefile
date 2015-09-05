@@ -1,2 +1,2 @@
 main:
-	gcc -lcurl src/main.c -o cryopaste
+	gcc src/main.c -o cryopaste -lcurl
