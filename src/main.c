@@ -23,19 +23,19 @@ int main(int argc, char* argv[]) {
 				}
 				fileset = 1;
 				if ((err = curl_easy_setopt(curl, CURLOPT_URL, url)) != CURLE_OK) {
-					printf("Unable to set URL: %s ERROR: %s\n", url, curl_easy_strerror(err));
+					fprintf(stderr, "Unable to set URL: %s ERROR: %s\n", url, curl_easy_strerror(err));
 					exit(1);
 				}
 				if ((err = curl_easy_setopt(curl, CURLOPT_PORT, port)) != CURLE_OK) {
-					printf("Unable to set PORT: %lu ERROR: %s\n", port, curl_easy_strerror(err));
+					fprintf(stderr, "Unable to set PORT: %lu ERROR: %s\n", port, curl_easy_strerror(err));
 					exit(1);
 				}
 				if ((err = curl_easy_setopt(curl, CURLOPT_HTTPPOST, paste_post)) != CURLE_OK) {
-					printf("Unable to set POST for HTTPPOST, ERROR: %s\n", curl_easy_strerror(err));
+					fprintf(stderr, "Unable to set POST for HTTPPOST, ERROR: %s\n", curl_easy_strerror(err));
 					exit(1);
 				}
 				if ((err = curl_easy_perform(curl)) != CURLE_OK) {
-					printf("Failed to submit post to %s, ERROR: %s\n", url, curl_easy_strerror(err));
+					fprintf(stderr, "Failed to submit post to %s, ERROR: %s\n", url, curl_easy_strerror(err));
 					exit(1);
 				}
 				curl_easy_cleanup(curl);
@@ -48,11 +48,14 @@ int main(int argc, char* argv[]) {
 // Add files to the form from argv[i]
 void parse_files(char* s) {
 	CURLFORMcode err;
-	if(access(s, F_OK) != -1) {
-	if ((err = curl_formadd(&paste_post, &paste_last, CURLFORM_COPYNAME, "file",
-			CURLFORM_FILE, s, CURLFORM_END)) != CURLE_OK) {
-		printf("Failed to add FILE: %s, ERROR: %s\n", s, formadd_error(err));
+	if(is_binary(s)) {
+		return;
 	}
+	if(access(s, F_OK) != -1) {
+		if ((err = curl_formadd(&paste_post, &paste_last, CURLFORM_COPYNAME, "file",
+				CURLFORM_FILE, s, CURLFORM_END)) != CURLE_OK) {
+			fprintf(stderr, "Failed to add FILE: %s, ERROR: %s\n", s, formadd_error(err));
+		}
 	} else {
 		printf("Unable to access %s, please verify the file exists.\n", s);
 	}
@@ -64,7 +67,12 @@ void usage(char* s) {
 cryopaste takes files and sends them over http\n \
 to http://cryopaste.com, the command will return a link.\n\n \
 eg: http://cryopaste.com/abZfhd\n\n \
-Each file is a ID on the website\n \
+cryopaste will skip binary files,\n \
+we don't want to fill up the server with accidental binaries\n \
+if you do wildcards (./*) it will skip directories as well.\n \
+we recommend you do wildcards for each directory\n \
+(src/* include/*)\n\n \
+Each file is an ID on the webpage\n \
 so to specify a file you can do:\n\n \
 http://cryopaste.com/abZfhd#file1.c\n\n");
 }
@@ -102,3 +110,28 @@ const char *formadd_error(CURLFORMcode err) {
 			break;
 	}
 }
+
+// Check for non-ascii chars in the file
+// should mean it's a binary.
+int is_binary(char* f) {
+	int ch;
+	int r = 0;
+	FILE *fp = fopen(f, "r");
+	if (fp != NULL) {
+		while(1)
+		{
+			ch = fgetc(fp);
+			if(feof(fp)) { break; }
+			if(!isascii(ch)) {
+				printf("%s is a binary File, skipping..\n", f);
+				r = 1;
+				break;
+			}
+		}
+		fclose(fp);
+	} else {
+		fprintf(stderr, "Unable to open FILE: %s, ERROR: %s", f, strerror(errno));
+	}
+	return r;
+}
+

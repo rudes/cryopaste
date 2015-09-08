@@ -1,3 +1,6 @@
+#include <errno.h>
+#include <sys/stat.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -21,3 +24,4 @@ int fileset = 0;
 void parse_files(char* s);
 void usage(char* s);
 const char *formadd_error(CURLFORMcode err);
+int is_binary(char* f);
