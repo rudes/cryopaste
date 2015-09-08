@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <ctype.h>
@@ -27,3 +28,4 @@ void parse_files(char* s);
 void usage(char* s);
 const char *formadd_error(CURLFORMcode err);
 int is_binary(char* f);
+int is_directory(char* f);

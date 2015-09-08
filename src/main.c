@@ -71,7 +71,29 @@ void parse_files(char* s) {
 	if (verbose) {
 		printf("Parsing %s...\n", s);
 	}
-	if(is_binary(s)) {
+	if (is_directory(s)) {
+		DIR *dir;
+		struct dirent *ent;
+		if (verbose) {
+			printf("Cascading into dir: %s\n", s);
+		}
+		// According to Dennis eventually with a big enough tree
+		// this code could cause the machine to run out of stack space.
+		// May need to refactor when I'm smarter.
+		if ((dir = opendir(s)) != NULL) {
+			while((ent = readdir(dir)) != NULL) {
+				if (ent->d_name[0] != '.') {
+					char f[strlen(s) + strlen(ent->d_name) + 2];
+					sprintf(f, "%s/%s", s, ent->d_name);
+					parse_files(f);
+				}
+			}
+			closedir(dir);
+			return;
+		} else {
+			fprintf(stderr, "Unable to open dir: %s, ERROR: %s\n", s, strerror(errno));
+		}
+	} else if (is_binary(s)) {
 		return;
 	}
 	if(access(s, F_OK) != -1) {
@@ -94,10 +116,7 @@ cryopaste takes files and sends them over http\n \
 to http://cryopaste.com, the command will return a link.\n\n \
 eg: http://cryopaste.com/abZfhd\n\n \
 cryopaste will skip binary files,\n \
-we don't want to fill up the server with accidental binaries\n \
-if you do wildcards (./*) it will skip directories as well.\n \
-we recommend you do wildcards for each directory\n \
-(src/* include/*)\n\n \
+we don't want to fill up the server with accidental binaries\n\n \
 Each file is an ID on the webpage\n \
 so to specify a file you can do:\n\n \
 http://cryopaste.com/abZfhd#file1.c\n\n");
@@ -143,6 +162,9 @@ int is_binary(char* f) {
 	int ch;
 	int r = 0;
 	FILE *fp = fopen(f, "r");
+	if (is_directory(f)) {
+		return r;
+	}
 	if (verbose) {
 		printf("Checking if %s is binary...\n", f);
 	}
@@ -164,3 +186,10 @@ int is_binary(char* f) {
 	return r;
 }
 
+// Check if a file is a directory
+// will cause parse_files to cascade into the directory
+int is_directory(char* f) {
+	struct stat path_stat;
+	stat(f, &path_stat);
+	return S_ISDIR(path_stat.st_mode);
+}
