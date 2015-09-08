@@ -9,6 +9,10 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
 
+	// Flags:
+	// -v: Verbose output
+	// -h: Usage info
+	// -V: Version number
 	for (i = 1; i < argc; i++) {
 		if (fileset) {
 			break;
@@ -18,6 +22,9 @@ int main(int argc, char* argv[]) {
 			exit(1);
 		} else if (strcmp(argv[i], "-v") == 0) {
 			verbose = 1;
+		} else if (strcmp(argv[i], "-V") == 0) {
+			printf("cryopaste Version %d.%d.%d\n", CRYO_MAJOR_VERSION, CRYO_MINOR_VERSION, CRYO_PATCH_VERSION);
+			exit(1);
 		} else {
 			if ((curl = curl_easy_init()) != NULL) {
 				for (i = 1; i < argc; i++) {
