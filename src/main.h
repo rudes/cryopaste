@@ -19,6 +19,8 @@ long port = 80;
 
 // If files have alredy been handled
 int fileset = 0;
+// If verbose flag is set
+int verbose = 0;
 
 // Function declerations
 void parse_files(char* s);

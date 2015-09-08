@@ -16,23 +16,37 @@ int main(int argc, char* argv[]) {
 		if (strcmp(argv[i], "-h") == 0) {
 			usage(argv[0]);
 			exit(1);
+		} else if (strcmp(argv[i], "-v") == 0) {
+			verbose = 1;
 		} else {
 			if ((curl = curl_easy_init()) != NULL) {
 				for (i = 1; i < argc; i++) {
 					parse_files(argv[i]);
 				}
 				fileset = 1;
+				if (verbose) {
+					printf("Setting URL: %s for curl...\n", url);
+				}
 				if ((err = curl_easy_setopt(curl, CURLOPT_URL, url)) != CURLE_OK) {
 					fprintf(stderr, "Unable to set URL: %s ERROR: %s\n", url, curl_easy_strerror(err));
 					exit(1);
+				}
+				if (verbose) {
+					printf("Setting PORT: %lu for curl...\n", port);
 				}
 				if ((err = curl_easy_setopt(curl, CURLOPT_PORT, port)) != CURLE_OK) {
 					fprintf(stderr, "Unable to set PORT: %lu ERROR: %s\n", port, curl_easy_strerror(err));
 					exit(1);
 				}
+				if (verbose) {
+					printf("Setting POST to curl...\n");
+				}
 				if ((err = curl_easy_setopt(curl, CURLOPT_HTTPPOST, paste_post)) != CURLE_OK) {
 					fprintf(stderr, "Unable to set POST for HTTPPOST, ERROR: %s\n", curl_easy_strerror(err));
 					exit(1);
+				}
+				if (verbose) {
+					printf("Pushing data to URL: %s\n", url);
 				}
 				if ((err = curl_easy_perform(curl)) != CURLE_OK) {
 					fprintf(stderr, "Failed to submit post to %s, ERROR: %s\n", url, curl_easy_strerror(err));
@@ -48,10 +62,22 @@ int main(int argc, char* argv[]) {
 // Add files to the form from argv[i]
 void parse_files(char* s) {
 	CURLFORMcode err;
+	if (strcmp(s, "-v") == 0) {
+		return;
+	}
+	if (strcmp(s, "-h") == 0) {
+		return;
+	}
+	if (verbose) {
+		printf("Parsing %s...\n", s);
+	}
 	if(is_binary(s)) {
 		return;
 	}
 	if(access(s, F_OK) != -1) {
+		if (verbose) {
+			printf("Adding %s to form...\n", s);
+		}
 		if ((err = curl_formadd(&paste_post, &paste_last, CURLFORM_COPYNAME, "file",
 				CURLFORM_FILE, s, CURLFORM_END)) != CURLE_OK) {
 			fprintf(stderr, "Failed to add FILE: %s, ERROR: %s\n", s, formadd_error(err));
@@ -117,6 +143,9 @@ int is_binary(char* f) {
 	int ch;
 	int r = 0;
 	FILE *fp = fopen(f, "r");
+	if (verbose) {
+		printf("Checking if %s is binary...\n", f);
+	}
 	if (fp != NULL) {
 		while(1)
 		{
@@ -130,7 +159,7 @@ int is_binary(char* f) {
 		}
 		fclose(fp);
 	} else {
-		fprintf(stderr, "Unable to open FILE: %s, ERROR: %s", f, strerror(errno));
+		fprintf(stderr, "Unable to open FILE: %s, ERROR: %s\n", f, strerror(errno));
 	}
 	return r;
 }
