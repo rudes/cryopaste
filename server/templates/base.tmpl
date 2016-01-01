@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+	<link rel="stylesheet" href="templates/static/styles/github-gist.css">
+	<script src="templates/static/highlight.pack.js"></script>
+	<script src="templates/static/highlightjs-line-numbers.min.js"></script>
+	<script>
+		hljs.configure({useBR: false});
+		hljs.initHighlightingOnLoad();
+		hljs.initLineNumbersOnLoad();
+	</script>
+</head>
+<body>
+	{{ range .Files }}
+		<h2 id="{{ .Filename }}">{{ .Filename }}</h2>
+		<pre><code class="{{ .Extension }}">{{ .Content }} </code></pre>
+	{{ end }}
+</body>
+</html>
+

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+	<link rel="stylesheet" href="templates/static/styles/github-gist.css">
+	<script src="templates/static/highlight.pack.js"></script>
+	<script src="templates/static/highlightjs-line-numbers.min.js"></script>
+	<script>
+		hljs.configure({useBR: false});
+		hljs.initHighlightingOnLoad();
+		hljs.initLineNumbersOnLoad();
+	</script>
+	<title>cryopaste</title>
+</head>
+<body>
+	<h2 id="install">How to Install Cryopaste</h2>
+
+	<pre><code class="bash">
+	sudo apt-get install libcurl4-dev libcurl4-openssl-dev
+	wget cryopaste.com/cryopaste.tar
+	tar -zxvf cryopaste.tar
+	cd cryopaste
+	make
+	cp cryopaste /usr/local/bin
+	</code></pre>
+
+	<h2 id="use">How to Use Cryopaste</h2>
+
+	<pre><code>
+	cryopaste [-v|-V|-h] file1.c file2.c ...
+
+	Flags:
+		-v: Verbose Mode (Debug)
+		-V: Version
+		-h: Help
+
+	cryopaste takes files and sends them over http
+	to http://cryopaste.com, the command will return a link.
+
+	eg: http://cryopaste.com/abZfhd
+	cryopaste will skip binary files,
+	we do not want to fill up the server with accidental binaries
+
+	Each file is an ID on the webpage
+	so to specify a file you can do:
+
+	http://cryopaste.com/abZfhd#file1.c
+	</code></pre>
+</body>
+</html>
+
