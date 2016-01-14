@@ -31,26 +31,26 @@ int main(int argc, char* argv[]) {
 				if ((err = curl_easy_setopt(curl, CURLOPT_URL, url)) != CURLE_OK) {
 					fprintf(stderr, "Unable to set URL: %s ERROR: %s\n", url,
 							curl_easy_strerror(err));
-					exit(1);
+					kill_curl(curl);
 				}
 				if (verbose) printf("Setting PORT: %lu for curl...\n", port);
 				if ((err = curl_easy_setopt(curl, CURLOPT_PORT, port)) != CURLE_OK) {
 					fprintf(stderr, "Unable to set PORT: %lu ERROR: %s\n", port,
 							curl_easy_strerror(err));
-					exit(1);
+					kill_curl(curl);
 				}
 				if (verbose) printf("Setting POST to curl...\n");
 				if ((err = curl_easy_setopt(curl, CURLOPT_HTTPPOST, paste_post))
 						!= CURLE_OK) {
 					fprintf(stderr, "Unable to set POST for HTTPPOST, ERROR: %s\n",
 							curl_easy_strerror(err));
-					exit(1);
+					kill_curl(curl);
 				}
 				if (verbose) printf("Pushing data to URL: %s\n", url);
 				if ((err = curl_easy_perform(curl)) != CURLE_OK) {
 					fprintf(stderr, "Failed to submit post to %s, ERROR: %s\n", url,
 							curl_easy_strerror(err));
-					exit(1);
+					kill_curl(curl);
 				}
 				curl_easy_cleanup(curl);
 			}
@@ -115,10 +115,10 @@ http://cryopaste.com/abZfhd#file1.c\n\n");
 }
 
 /*
-* curl_formadd returns a CURLFORMcode but libcurl doesn't have a
-* error handler for CURLFORMcode,
-* this handles all the errors defined in curl/curl.h
-*/
+ * curl_formadd returns a CURLFORMcode but libcurl doesn't have a
+ * error handler for CURLFORMcode,
+ * this handles all the errors defined in curl/curl.h
+ */
 const char *formadd_error(CURLFORMcode err) {
 	switch (err) {
 		case CURL_FORMADD_OK:
@@ -152,9 +152,9 @@ const char *formadd_error(CURLFORMcode err) {
 }
 
 /*
-Check for non-ascii chars in the file
-should mean it's a binary.
-*/
+ * Check for non-ascii chars in the file
+ * should mean it's a binary.
+ */
 int is_binary(char* f) {
 	int ch = 0, r = 0;
 	FILE *fp = fopen(f, "r");
@@ -178,11 +178,19 @@ int is_binary(char* f) {
 }
 
 /*
-Check if a file is a directory
-will cause parse_files to cascade into the directory
+ * Check if a file is a directory
+ * will cause parse_files to cascade into the directory
 */
 int is_directory(char* f) {
 	struct stat path_stat;
 	stat(f, &path_stat);
 	return S_ISDIR(path_stat.st_mode);
+}
+
+/*
+ * Exit the program and dispose of the CURL object
+ */
+void kill_curl(CURL * curl) {
+	curl_easy_cleanup(curl);
+	exit(1);
 }

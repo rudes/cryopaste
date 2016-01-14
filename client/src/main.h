@@ -34,3 +34,4 @@ void usage(char* s);
 const char *formadd_error(CURLFORMcode err);
 int is_binary(char* f);
 int is_directory(char* f);
+void kill_curl(CURL * curl);
