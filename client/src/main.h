@@ -26,7 +26,7 @@ int verbose = 0;
 /* Version */
 int CRYO_MAJOR_VERSION = 1;
 int CRYO_MINOR_VERSION = 0;
-int CRYO_PATCH_VERSION = 0;
+int CRYO_PATCH_VERSION = 1;
 
 /* Function declerations */
 void parse_files(char* s);
