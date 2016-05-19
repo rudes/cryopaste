@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 
 main:
-	gcc src/main.c -o cryopaste -lcurl
+	gcc src/main.c -o cryopaste -lcurl -Iinc
 
 install:
 	if [ -a "/usr/local/bin" ]; then \
