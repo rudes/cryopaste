@@ -1,8 +1,8 @@
 #include "main.h"
 
 int main(int argc, char* argv[]) {
-	int i;
-	CURLcode err;
+	int				i;
+	CURLcode	err;
 
 	if (argc < 2) {
 		usage(argv[0]);
@@ -156,8 +156,9 @@ const char *formadd_error(CURLFORMcode err) {
  * should mean it's a binary.
  */
 int is_binary(char* f) {
-	int ch = 0, r = 0;
-	FILE *fp = fopen(f, "r");
+	int		ch	= 0;
+	int		r		= 0;
+	FILE	*fp = fopen(f, "r");
 	if (is_directory(f)) return r;
 	if (verbose) printf("Checking if %s is binary...\n", f);
 	if (fp != NULL) {
