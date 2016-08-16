@@ -20,7 +20,8 @@
 	tar -zxvf cryopaste.tar
 	cd cryopaste
 	make
-	cp cryopaste /usr/local/bin
+	make install
+	make clean
 	</code></pre>
 
 	<h2 id="use">How to Use Cryopaste</h2>
@@ -33,17 +34,17 @@
 		-V: Version
 		-h: Help
 
-	cryopaste takes files and sends them over http
-	to http://cryopaste.com, the command will return a link.
+	#cryopaste takes files and sends them over http
+	#to http://cryopaste.com, the command will return a link.
 
-	eg: http://cryopaste.com/abZfhd
-	cryopaste will skip binary files,
-	we do not want to fill up the server with accidental binaries
+	#eg: http://cryopaste.com/abZfhd
+	#cryopaste will skip binary files,
+	#we do not want to fill up the server with accidental binaries
 
-	Each file is an ID on the webpage
-	so to specify a file you can do:
+	#Each file is an ID on the webpage
+	#so to specify a file you can do:
 
-	http://cryopaste.com/abZfhd#file1.c
+	#http://cryopaste.com/abZfhd#file1.c
 	</code></pre>
 </body>
 </html>
