@@ -10,3 +10,6 @@ install:
 		mkdir -p /usr/local/bin; \
 		mv cryopaste /usr/local/bin; \
 	fi
+
+clean:
+	rm -vf cryopaste
