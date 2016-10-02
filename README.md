@@ -19,3 +19,31 @@ cd cryopaste
 make
 make install
 ```
+
+If you're looking to host your own instance you'll need to do some tweaking.
+
+You'll need [git](https://git-scm.com/),
+[docker](https://www.docker.com/),
+[libcurl](https://curl.haxx.se/libcurl/),
+[gcc](https://gcc.gnu.org/), and
+[make](https://www.gnu.org/software/make/).
+
+```bash
+# Clone the repo
+git clone http://lab.cryocorp.co/rudes/cryopaste.com.git
+cd cryopaste.com
+# Replace the URL in line 18 with your domain.
+# Also replace the port if you're changing the port on line 19.
+$EDITOR client/inc/main.h
+# Build the client for yourself.
+cd client
+make && make install && make clean
+# Build the tarbal for your clients
+cd ../
+tar -czf server/templates/static/cryopaste.tar client
+# Build and deploy the docker image
+cd server
+docker build -t .
+docker run -d -p 8080:8080 --name=cryopaste cryopaste
+# You should be good to go now.
+```
