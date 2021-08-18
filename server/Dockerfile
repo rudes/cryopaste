@@ -1,7 +1,15 @@
-FROM golang
+FROM golang AS builder
 
-ADD . /go/src/github.com/rudes/cryopaste/
-RUN go install github.com/rudes/cryopaste
-ENTRYPOINT /go/bin/cryopaste
+WORKDIR /app
+COPY . .
+RUN go mod download
+RUN CGO_ENABLED=0 GOOS=linux go build -o cryopaste
 
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /app
+COPY --from=builder /app .
 EXPOSE 8080
+
+ENTRYPOINT "/app/cryopaste"
