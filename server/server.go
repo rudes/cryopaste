@@ -14,8 +14,10 @@ import (
 )
 
 const (
-	STATIC_URL  = "/templates/static/"
-	STATIC_ROOT = "/go/src/github.com/rudes/cryopaste/templates/static/"
+	STATIC_URL    = "/templates/static/"
+	CODE_ROOT     = "/app/code/"
+	STATIC_ROOT   = "/app/templates/static/"
+	TEMPLATE_ROOT = "/app/templates/"
 )
 
 type Files struct {
@@ -40,7 +42,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		// Do nothing for right now.
 		if r.URL.Path == "/" {
-			http.ServeFile(w, r, "/go/src/github.com/rudes/cryopaste/templates/home.tmpl")
+			http.ServeFile(w, r, TEMPLATE_ROOT+"/home.tmpl")
 			return
 		} else {
 			render(w, r, r.URL.Path)
@@ -57,22 +59,28 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		h := md5.Sum([]byte(r.RemoteAddr + time.Now().String()))
 		hish := fmt.Sprintf("%x", h[:3])
-		os.MkdirAll("/go/src/github.com/rudes/cryopaste/code/"+hish, os.ModeDir|0744)
+		err = os.MkdirAll(CODE_ROOT+hish, os.ModeDir|0744)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		files := m.File["file"]
-		for i, _ := range files {
+		for i := range files {
 			f, err := files[i].Open()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 			defer f.Close()
+			d, err := os.Create(CODE_ROOT + hish + "/" + files[i].Filename)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			d, err := os.Create("/go/src/github.com/rudes/cryopaste/code/" + hish + "/" + files[i].Filename)
 			defer d.Close()
-			if err != nil {
+			if _, err := io.Copy(d, f); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
-			}
-			if _, err := io.Copy(d, f); err != nil {
 			}
 		}
 		fmt.Fprintf(w, "http://cryopaste.com/%s\n", hish)
@@ -106,7 +114,7 @@ func DownloadHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func render(w http.ResponseWriter, r *http.Request, l string) {
-	root := filepath.Join("/go/src/github.com/rudes/cryopaste/code/", l)
+	root := filepath.Join(CODE_ROOT, l)
 	f, err := os.Open(root)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -163,10 +171,14 @@ func render(w http.ResponseWriter, r *http.Request, l string) {
 	// 	fmt.Fprintf(w, "%s\n", end.Content)
 	// }
 
-	t, err := template.ParseFiles("/go/src/github.com/rudes/cryopaste/templates/base.tmpl")
+	t, err := template.ParseFiles(TEMPLATE_ROOT + "base.tmpl")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	t.Execute(w, D)
+	err = t.Execute(w, D)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
